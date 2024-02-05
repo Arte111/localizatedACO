@@ -6,7 +6,7 @@ from Graph import Graph
 if __name__ == "__main__":
     aco_worktime = 30
     graph = Graph()
-    graph.load_from_file("2d100.txt")
+    graph.load("2d100.txt")
     graph.add_k_nearest_edges(60)
     parameters = {
         "ant_count": range(20, 150, 10),

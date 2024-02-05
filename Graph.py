@@ -1,11 +1,8 @@
-import time
-
 import matplotlib.pyplot as plt
 import numpy as np
 from mpl_toolkits.mplot3d.art3d import Line3DCollection
 from numpy import random
 from scipy.spatial.distance import cdist
-import matplotlib.animation as animation
 import random
 
 from Edge import Edge
@@ -18,7 +15,7 @@ class Graph:
     def __init__(self):
         self.graph = []
 
-    def load_from_file(self, file_path):
+    def load(self, file_path):
         self.graph.clear()
         with open(file_path, 'r') as file:
             for index, line in enumerate(file):
@@ -178,155 +175,13 @@ class Graph:
         lence += Graph.distance(temp[0], temp[-1])
         return lence
 
-    def stepACO(self, ant_count, A, B, Q, evap):
-        node_count = len(self.graph)
-        better_path = []
-        better_path_len = float("inf")
-        for _ in range(ant_count):
-            path = [random.choice(self.graph)]
+    def __len__(self):
+        return len(self.graph)
 
-            while len(path) < node_count:
-                enable = {node: edge for node, edge in path[-1].edges.items() if node not in path}
-                if not enable:
-                    break
-
-                probabilities = np.array([pow(edge.pheromone, A) * pow(edge.closeness, B) for edge in enable.values()])
-                probabilities /= probabilities.sum()
-
-                chosen_index = np.random.choice(len(enable), p=probabilities)
-                path.append(list(enable.keys())[chosen_index])
-
-            # Check valid path
-            if len(path) != node_count or path[-1].edges.get(path[0]) is None:
-                continue
-
-            # Calculate path length
-            path_len = 0.0
-            for j in range(len(path)):
-                path_len += path[j].edges[path[(j + 1) % len(path)]].len
-
-            # Update best path
-            if better_path_len > path_len:
-                better_path = path
-                better_path_len = path_len
-
-        # функция на С должна возвращать лучший путь, его длинну
-        # принимает ant_count, 2 таблицы -- феромоны и расстояния (или же продолжить ебаться с ооп), А, В
-
-        # костыль(.. ну а что поделать
-        if len(better_path) == 0:
-            # print("no path")
-            return float('inf'), None
-
-        # Evaporation
+    def evaporation(self, evaporation):
         for node in self.graph:
             for edge in node.edges.values():
-                edge.pheromone = (1 - evap) * edge.pheromone
+                edge.pheromone *= (1 - evaporation)
 
-        # add ph by best_path
-        ph = Q / better_path_len
-        for j in range(len(better_path)):
-            self.graph[better_path[j].index].edges[better_path[(j + 1) % len(better_path)]].pheromone += ph
-            self.graph[better_path[(j + 1) % len(better_path)].index].edges[better_path[j]].pheromone += ph
-
-        return better_path_len, better_path
-
-    def stepElite(self, best_path, best_path_len, Q, ant_count=1):
-        ph = (Q / best_path_len) * ant_count
-        for j in range(len(best_path)):
-            self.graph[best_path[j].index].edges[best_path[(j + 1) % len(best_path)]].pheromone += ph
-            self.graph[best_path[(j + 1) % len(best_path)].index].edges[best_path[j]].pheromone += ph
-
-    def ACO(self, try_count, ant_count, A, B, Q, evap, start_ph):
-        self.setPH(start_ph)
-        best_path = []
-        best_path_len = float('inf')
-        for _ in range(try_count):
-            bpl, bp = self.stepACO(ant_count=ant_count, A=A, B=B, Q=Q, evap=evap)
-            if bpl < best_path_len:
-                best_path_len = bpl
-                best_path = bp
-            if bp is not None:
-                self.stepElite(bp, bpl, Q)
-
-        return best_path_len, best_path
-
-    def ACOperfomance(self, ant_count, A, B, Q, evap, start_ph, worktime):
-        performance = 0
-        self.setPH(start_ph)
-        # best_path_len = self.lenRandomPath()
-        best_path_len = float("inf")
-        starttime = time.time()
-        lasttime = time.time()
-        while time.time() - starttime < worktime:
-            bpl, _ = self.stepACO(ant_count=ant_count, A=A, B=B, Q=Q, evap=evap)
-            if best_path_len > bpl:
-                performance += (time.time() - lasttime) * bpl
-                lasttime = time.time()
-                best_path_len = bpl
-
-        return performance
-
-
-if __name__ == "__main__":
-    print("Okay, let's go")
-    graph = Graph()
-    graph.load_from_file("3d300-1.txt")
-    graph.add_k_nearest_edges(200)
-
-
-    print([graph.ACOperfomance(260, 1, 2, 9420, 0.35, 0.3, 60) for _ in range(5)])
-
-    # generate files with graph
-    """for d in range(2, 11):
-        for i in range(1, 5):
-            graph = Graph()
-            graph.generate_random_graph(300, d)
-            graph.upload(f"{d}d300-{i}.txt")"""
-
-    # testing Q param
-    """for d in range(2, 11, 2):
-        for i in range(1, 5):
-            graph = Graph()
-            graph.load_from_file(f"{d}d300-{i}.txt")
-            graph.add_k_nearest_edges(120)
-            for k in range(100, 20_000, 1_000):
-                res = []
-                for _ in range(10):
-                    res.append(graph.ACOperfomance(ant_count=300, A=1, B=2, Q=k, evap=0.2, start_ph=0.2, worktime=60))
-                print(f"{d}d300-{i} {k} {res}")"""
-
-    # testing K nearist
-    """for d, q in zip([4, 5, 7, 9], [5150, 6150, 7250, 8350]):
-        for i in range(1, 5):
-            for k in range(95, 14, -10):
-                res = []
-                for _ in range(10):
-                    graph = Graph()
-                    graph.load_from_file(f"{d}d100-{i}.txt")
-                    graph.add_k_nearest_edges(k)
-                    res.append(graph.ACOperfomance(ant_count=100, A=1, B=2, Q=q, evap=0.2, start_ph=0.2, worktime=60))
-                print(f"{d}d100-{i} {k} {res}")"""
-
-    """for i in range(1, 5):
-        graph = Graph()
-        graph.load_from_file(f"10d300-{i}.txt")
-        graph.add_k_nearest_edges(120)
-        for k in range(10_000, 100_001, 10_000):
-            res = []
-            for _ in range(10):
-                res.append(graph.ACOperfomance(ant_count=100, A=1, B=2, Q=k, evap=0.2, start_ph=0.2, worktime=60))
-            print(f"10d300-{i} {k} {res}")
-
-
-
-    for i in range(1, 5):
-        graph = Graph()
-        graph.load_from_file(f"9d300-{i}.txt")
-        graph.add_k_nearest_edges(120)
-        for k in range(10_000, 100_001, 10_000):
-            res = []
-            for _ in range(10):
-                res.append(graph.ACOperfomance(ant_count=100, A=1, B=2, Q=k, evap=0.2, start_ph=0.2, worktime=60))
-            print(f"9d300-{i} {k} {res}")
-    """
+    def randomNode(self):
+        return np.random.choice(self.graph)
