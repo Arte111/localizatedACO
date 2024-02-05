@@ -1,15 +1,16 @@
+import numpy as np
+
+
 class Node:
     index: int
 
-    def __init__(self, index, x=None, y=None, z=None):
+    def __init__(self, index, coordinates):
         self.index = int(index)
         self.edges = {}
-        self.x = x
-        self.y = y
-        self.z = z
+        self.cords = np.array(coordinates)
 
     def __str__(self):
-        res = f"{self.index}: "
+        res = f"{self.index} {' '.join(map(str, self.cords))}: "
         for node, _ in self.edges.items():
             res += f"{node.index} "
         return res
