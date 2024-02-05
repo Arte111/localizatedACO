@@ -1,3 +1,4 @@
+import os
 import time
 
 import numpy as np
@@ -10,6 +11,7 @@ class ACO:
         self.graph = graph
 
     def step(self, ant_count, A, B, Q, evap):
+        # TODO: написать функцию на С\Python API (да, сложно, надо.)
         node_count = len(self.graph)
         better_path = []
         better_path_len = float("inf")
@@ -63,7 +65,7 @@ class ACO:
             self.graph.graph[best_path[j].index].edges[best_path[(j + 1) % len(best_path)]].pheromone += ph
             self.graph.graph[best_path[(j + 1) % len(best_path)].index].edges[best_path[j]].pheromone += ph
 
-    def run_local(self, try_count, ant_count, A, B, Q, evap, start_ph):
+    def run(self, try_count, ant_count, A, B, Q, evap, start_ph):
         self.graph.setPH(start_ph)
         best_path = []
         best_path_len = float('inf')
@@ -93,7 +95,8 @@ class ACO:
 
         return performance
 
-    def run_performance_print(self, ant_count, A, B, Q, evap, start_ph, worktime):
+    def run_print(self, ant_count, A, B, Q, evap, start_ph, worktime):
+        # TODO: написать отображение графика эфективности
         self.graph.setPH(start_ph)
         best_path_len = self.graph.lenRandomPath()
         # best_path_len = float("inf")
@@ -109,8 +112,12 @@ class ACO:
 
 if __name__ == "__main__":
     graph = Graph()
-    graph.generate_random_graph(100, 3)
-    graph.add_k_nearest_edges(99)
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    file_path = os.path.join(current_dir, 'benchmarks', '2d100.txt')
+    graph.load(file_path)
+    graph.add_k_nearest_edges(30)
 
     aco = ACO(graph)
-    print(aco.run_performance_print(60,	1,	4,	1500,	0.4,	0.48, 60))
+    aco.run_print(100, 1, 3, 900, 0.4, 0.4, 60)
+    _, bestPath = aco.run(20, 100, 1, 4, 1500, 0.4, 0.2)
+    graph.visualize_best_path_2d(bestPath)
