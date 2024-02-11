@@ -11,7 +11,6 @@ class ACO:
         self.graph = graph
 
     def step(self, ant_count, A, B, Q, evap):
-        print("step")
         node_count = len(self.graph)
         better_path = []
         better_path_len = float("inf")
@@ -19,7 +18,6 @@ class ACO:
             path = np.array([self.graph.randomNode()])
 
             while len(path) < node_count:
-                # TODO: заменить np.arange на поиск доступных вершин в графе
                 enable = np.setdiff1d(np.arange(len(self.graph)), path)
 
                 probabilities = np.array([pow(self.graph.distance_matrix[path[-1]][i], A) *
@@ -77,6 +75,7 @@ class ACO:
         return performance
 
     def run_print(self, ant_count, A, B, Q, evap, start_ph, worktime):
+        print("let's gooo")
         # TODO: написать отображение графика эфективности
         self.graph.setPH(start_ph)
         # best_path_len = self.graph.lenRandomPath()
@@ -95,8 +94,12 @@ if __name__ == "__main__":
     graph = Graph()
     current_dir = os.path.dirname(os.path.abspath(__file__))
     file_path = os.path.join(current_dir, 'benchmarks', '2d100.txt')
-    graph.load(file_path)
+    graph.load(file_path, ph=0.4)
 
     aco = ACO(graph)
-    aco.run_print(100, 1, 3, 900, 0.4, 0.4, 20)
+    start = time.time()
+    for _ in range(100):
+        aco.step(100, 1, 2.43152, 500, 0.4)
+    finish = time.time()
+    print(finish - start)
 

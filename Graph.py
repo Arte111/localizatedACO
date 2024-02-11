@@ -9,6 +9,7 @@ class Graph:
         self.cords = np.empty(shape=(0, 0), dtype="double")
         self.distance_matrix = np.empty(shape=(0, 0), dtype="double")
         self.pheromone_matrix = np.empty(shape=(0, 0), dtype="double")
+        self.enable_paths = np.zeros(shape=(0, 0), dtype="int")
 
     def load(self, path, ph=0):
         temp = []
