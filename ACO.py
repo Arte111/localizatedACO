@@ -18,7 +18,9 @@ class ACO:
             path = np.array([self.graph.randomNode()])
 
             while len(path) < node_count:
-                enable = np.setdiff1d(np.arange(len(self.graph)), path)
+                enable = np.setdiff1d(np.nonzero(self.graph.distance_matrix[path[-1]]), path)
+                if len(enable) == 0:
+                    break  # path not found
 
                 probabilities = np.array([pow(self.graph.distance_matrix[path[-1]][i], A) *
                                           pow(self.graph.pheromone_matrix[path[-1]][i], B)
@@ -28,6 +30,9 @@ class ACO:
                 chosen_index = np.random.choice(enable, p=probabilities)
 
                 path = np.append(path, chosen_index)
+
+            if len(path) != node_count or self.graph.distance_matrix[path[0]][path[-1]] == 0:
+                continue  # because we didn't find valid path
 
             # Calculate path length
             path_len = 0.0
@@ -53,8 +58,11 @@ class ACO:
         for j in range(len(better_path) - 1):
             self.graph.pheromone_matrix[better_path[j]][better_path[j + 1]] += ph
             self.graph.pheromone_matrix[better_path[j + 1]][better_path[j]] += ph
-        self.graph.pheromone_matrix[better_path[-1]][better_path[0]] += ph
-        self.graph.pheromone_matrix[better_path[0]][better_path[-1]] += ph
+        try:
+            self.graph.pheromone_matrix[better_path[-1]][better_path[0]] += ph
+            self.graph.pheromone_matrix[better_path[0]][better_path[-1]] += ph
+        except IndexError:
+            pass
 
         return better_path_len, better_path
 
@@ -95,11 +103,11 @@ if __name__ == "__main__":
     current_dir = os.path.dirname(os.path.abspath(__file__))
     file_path = os.path.join(current_dir, 'benchmarks', '2d100.txt')
     graph.load(file_path, ph=0.4)
+    graph.add_k_nearest(99)
 
     aco = ACO(graph)
-    start = time.time()
-    for _ in range(100):
-        aco.step(100, 1, 2.43152, 500, 0.4)
-    finish = time.time()
-    print(finish - start)
+    for _ in range(10):
+        print(aco.run_performance(20, 1, 3, 100, 0.4, 0.4, 20))
+
+
 
