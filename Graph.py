@@ -38,10 +38,6 @@ class Graph:
     def __len__(self):
         return len(self.cords)
 
-    def randomNode(self):
-        # return random index
-        return random.randint(0, len(self.cords) - 1)
-
     def evaporation(self, evaporation):
         self.pheromone_matrix += 1 - evaporation
 

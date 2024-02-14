@@ -1,6 +1,5 @@
 import os
 import time
-from pprint import pprint
 
 import numpy as np
 from Graph import Graph
@@ -15,30 +14,26 @@ class ACO:
         better_path = []
         better_path_len = float("inf")
         for _ in range(ant_count):
-            path = np.array([self.graph.randomNode()])
+            path = np.empty(node_count, dtype=int)
+            path[0] = np.random.randint(0, node_count)
 
-            while len(path) < node_count:
-                enable = np.setdiff1d(np.nonzero(self.graph.distance_matrix[path[-1]]), path)
+            for i in range(1, node_count):
+                enable = np.setdiff1d(np.nonzero(self.graph.distance_matrix[path[i - 1]]), path[:i])
                 if len(enable) == 0:
                     break  # path not found
 
-                probabilities = np.array([pow(self.graph.distance_matrix[path[-1]][i], A) *
-                                          pow(self.graph.pheromone_matrix[path[-1]][i], B)
-                                          for i in enable])
+                probabilities = np.power(self.graph.distance_matrix[path[i - 1]][enable], A) * \
+                                np.power(self.graph.pheromone_matrix[path[i - 1]][enable], B)
                 probabilities /= probabilities.sum()
 
-                chosen_index = np.random.choice(enable, p=probabilities)
+                path[i] = np.random.choice(enable, p=probabilities)
 
-                path = np.append(path, chosen_index)
-
-            if len(path) != node_count or self.graph.distance_matrix[path[0]][path[-1]] == 0:
+            if self.graph.distance_matrix[path[0]][path[-1]] == 0:
                 continue  # because we didn't find valid path
 
             # Calculate path length
-            path_len = 0.0
-            for j in range(len(path) - 1):
-                path_len += self.graph.distance_matrix[path[j]][path[j + 1]]
-            path_len += self.graph.distance_matrix[path[-1]][path[0]]
+            path_len = np.sum(self.graph.distance_matrix[path[:-1], path[1:]]) + \
+                       self.graph.distance_matrix[path[-1], path[0]]
 
             # Update best path
             if better_path_len > path_len:
@@ -106,8 +101,18 @@ if __name__ == "__main__":
     graph.add_k_nearest(99)
 
     aco = ACO(graph)
-    for _ in range(10):
-        print(aco.run_performance(20, 1, 3, 100, 0.4, 0.4, 20))
-
-
-
+    start = time.time()
+    aco.step(20, 1, 3, 100, 0.4)
+    aco.step(20, 1, 3, 100, 0.4)
+    aco.step(20, 1, 3, 100, 0.4)
+    aco.step(20, 1, 3, 100, 0.4)
+    aco.step(20, 1, 3, 100, 0.4)
+    aco.step(20, 1, 3, 100, 0.4)
+    aco.step(20, 1, 3, 100, 0.4)
+    aco.step(20, 1, 3, 100, 0.4)
+    aco.step(20, 1, 3, 100, 0.4)
+    aco.step(20, 1, 3, 100, 0.4)
+    finish = time.time()
+    print(finish - start)
+    """for _ in range(10):
+        print(aco.run_performance(20, 1, 3, 100, 0.4, 0.4, 20))"""
