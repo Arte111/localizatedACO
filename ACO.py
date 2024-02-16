@@ -126,6 +126,16 @@ if __name__ == "__main__":
     aco = ACO(graph)
     start = time.time()
     aco.step(1, 1, 3, 100, 0.4)
+    aco.step(1, 1, 3, 100, 0.4)
+    aco.step(1, 1, 3, 100, 0.4)
+    aco.step(1, 1, 3, 100, 0.4)
+    aco.step(1, 1, 3, 100, 0.4)
+    aco.step(1, 1, 3, 100, 0.4)
+    aco.step(1, 1, 3, 100, 0.4)
+    aco.step(1, 1, 3, 100, 0.4)
+    aco.step(1, 1, 3, 100, 0.4)
+    aco.step(1, 1, 3, 100, 0.4)
+
 
     finish = time.time()
     print(finish - start)
