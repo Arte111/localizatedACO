@@ -1,8 +1,21 @@
 import os
 import time
 import random
-
 import numpy as np
+from numpy.ctypeslib import ndpointer
+import ctypes
+
+_doublepp = ndpointer(dtype=np.uintp, ndim=1, flags='C')
+
+_dll = ctypes.CDLL('D:/projects/testsyka/x64/Debug/testsyka.dll')
+
+_step = _dll.step
+_step.argtypes = [_doublepp, _doublepp, ctypes.c_size_t, ctypes.c_size_t,
+                  ctypes.c_double, ctypes.c_double, ctypes.c_double, ctypes.c_double]
+
+_step.restype = ctypes.POINTER(ctypes.c_size_t)
+
+
 # from Graph import Graph
 import numpy as np
 from scipy.spatial.distance import cdist
@@ -52,57 +65,24 @@ class ACO:
     def __init__(self, graph):
         self.graph = graph
 
-    def step(self, ant_count, A, B, Q, evap):
-        node_count = len(self.graph)
-        better_path = []
-        better_path_len = float("inf")
-        for _ in range(ant_count):
-            path = np.empty(node_count, dtype=int)
-            path[0] = random.randint(0, node_count - 1)
-            for i in range(1, node_count):
-                # for i in range(1, node_count)
-                enable = np.setdiff1d(np.nonzero(self.graph.distance_matrix[path[i - 1]]), path[:i])
-                if len(enable) == 0:
-                    break  # path not found
+    def step(self, ant_count, A, B, Q, E):
 
-                probabilities = np.power(self.graph.distance_matrix[path[i - 1]][enable], A) * \
-                                np.power(self.graph.pheromone_matrix[path[i - 1]][enable], B)
-                probabilities /= probabilities.sum()
+        dmpp = (self.graph.distance_matrix.__array_interface__['data'][0] +
+                np.arange(self.graph.distance_matrix.shape[0]) * self.graph.distance_matrix.strides[0]).astype(np.uintp)
+        pmpp = (self.graph.pheromone_matrix.__array_interface__['data'][0] +
+                np.arange(self.graph.pheromone_matrix.shape[0]) * self.graph.pheromone_matrix.strides[0]).astype(np.uintp)
+        node_count = ctypes.c_size_t(self.graph.pheromone_matrix.shape[0])
+        ant_count = ctypes.c_size_t(ant_count)
+        A = ctypes.c_double(A)
+        B = ctypes.c_double(B)
+        Q = ctypes.c_double(Q)
+        E = ctypes.c_double(E)
+        result_ptr = _step(dmpp, pmpp, node_count, ant_count, A, B, Q, E)
 
-                path[i] = random.choices(enable, weights=probabilities)[0]
-
-            if self.graph.distance_matrix[path[0]][path[-1]] == 0:
-                continue  # because we didn't find valid path
-
-            # Calculate path length
-            path_len = np.sum(self.graph.distance_matrix[path[:-1], path[1:]]) + \
-                       self.graph.distance_matrix[path[-1], path[0]]
-
-            # Update best path
-            if better_path_len > path_len:
-                better_path = path
-                better_path_len = path_len
-
-        # костыль(.. ну а что поделать
-        """if len(better_path) == 0:
-            # print("no path")
-            return float('inf'), None"""
-
-        # Evaporation
-        self.graph.evaporation(evap)
-
-        # add ph by best_path
-        ph = Q / better_path_len
-        for j in range(len(better_path) - 1):
-            self.graph.pheromone_matrix[better_path[j]][better_path[j + 1]] += ph
-            self.graph.pheromone_matrix[better_path[j + 1]][better_path[j]] += ph
-        try:
-            self.graph.pheromone_matrix[better_path[-1]][better_path[0]] += ph
-            self.graph.pheromone_matrix[better_path[0]][better_path[-1]] += ph
-        except IndexError:
-            pass
-
-        return better_path_len, better_path
+        # Преобразование указателя в массив
+        better_path = np.ctypeslib.as_array(result_ptr, shape=(1, node_count.value))[0]
+        #return better_path_len, better_path
+        return 0, better_path
 
     def run_performance(self, ant_count, A, B, Q, evap, start_ph, worktime):
         performance = 0
@@ -145,16 +125,8 @@ if __name__ == "__main__":
 
     aco = ACO(graph)
     start = time.time()
-    aco.step(20, 1, 3, 100, 0.4)
-    aco.step(20, 1, 3, 100, 0.4)
-    aco.step(20, 1, 3, 100, 0.4)
-    aco.step(20, 1, 3, 100, 0.4)
-    aco.step(20, 1, 3, 100, 0.4)
-    aco.step(20, 1, 3, 100, 0.4)
-    aco.step(20, 1, 3, 100, 0.4)
-    aco.step(20, 1, 3, 100, 0.4)
-    aco.step(20, 1, 3, 100, 0.4)
-    aco.step(20, 1, 3, 100, 0.4)
+    aco.step(1, 1, 3, 100, 0.4)
+
     finish = time.time()
     print(finish - start)
     """for _ in range(10):
