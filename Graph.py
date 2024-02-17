@@ -2,6 +2,8 @@ import random
 from pprint import pprint
 
 import numpy as np
+from matplotlib import pyplot as plt
+from matplotlib.lines import Line2D
 from scipy.spatial.distance import cdist
 
 

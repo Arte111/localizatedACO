@@ -1,6 +1,5 @@
 import os
 import time
-import random
 import numpy as np
 from numpy.ctypeslib import ndpointer
 import ctypes
@@ -11,10 +10,9 @@ _dll = ctypes.CDLL('D:/projects/testsyka/x64/Debug/testsyka.dll')
 
 _step = _dll.step
 _step.argtypes = [_doublepp, _doublepp, ctypes.c_size_t, ctypes.c_size_t,
-                  ctypes.c_double, ctypes.c_double, ctypes.c_double, ctypes.c_double]
+                  ctypes.c_double, ctypes.c_double, ctypes.c_double, ctypes.c_double, ctypes.POINTER(ctypes.c_double)]
 
 _step.restype = ctypes.POINTER(ctypes.c_size_t)
-
 
 # from Graph import Graph
 import numpy as np
@@ -67,22 +65,22 @@ class ACO:
 
     def step(self, ant_count, A, B, Q, E):
 
-        dmpp = (self.graph.distance_matrix.__array_interface__['data'][0] +
-                np.arange(self.graph.distance_matrix.shape[0]) * self.graph.distance_matrix.strides[0]).astype(np.uintp)
-        pmpp = (self.graph.pheromone_matrix.__array_interface__['data'][0] +
-                np.arange(self.graph.pheromone_matrix.shape[0]) * self.graph.pheromone_matrix.strides[0]).astype(np.uintp)
+        dmpp = (self.graph.distance_matrix.__array_interface__['data'][0] + np.arange(
+            self.graph.distance_matrix.shape[0]) * self.graph.distance_matrix.strides[0]).astype(np.uintp)
+        pmpp = (self.graph.pheromone_matrix.__array_interface__['data'][0] + np.arange(
+            self.graph.pheromone_matrix.shape[0]) * self.graph.pheromone_matrix.strides[0]).astype(np.uintp)
         node_count = ctypes.c_size_t(self.graph.pheromone_matrix.shape[0])
         ant_count = ctypes.c_size_t(ant_count)
         A = ctypes.c_double(A)
         B = ctypes.c_double(B)
         Q = ctypes.c_double(Q)
         E = ctypes.c_double(E)
-        result_ptr = _step(dmpp, pmpp, node_count, ant_count, A, B, Q, E)
+        bpl = ctypes.c_double()
+        result_ptr = _step(dmpp, pmpp, node_count, ant_count, A, B, Q, E, ctypes.byref(bpl))
 
         # Преобразование указателя в массив
         better_path = np.ctypeslib.as_array(result_ptr, shape=(1, node_count.value))[0]
-        #return better_path_len, better_path
-        return 0, better_path
+        return bpl.value, better_path
 
     def run_performance(self, ant_count, A, B, Q, evap, start_ph, worktime):
         performance = 0
@@ -125,9 +123,8 @@ if __name__ == "__main__":
 
     aco = ACO(graph)
     start = time.time()
-    aco.step(20, 1, 3, 100, 0.4)
+    print(aco.step(20, 1, 3, 100, 0.4))
     finish = time.time()
     print(finish - start)
     """for _ in range(10):
         print(aco.run_performance(20, 1, 3, 100, 0.4, 0.4, 20))"""
-
