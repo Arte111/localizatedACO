@@ -56,7 +56,7 @@ class ACO:
         return performance
 
     def run_print(self, ant_count, A, B, Q, evap, start_ph, worktime):
-        print("let's gooo")
+        print("let's go")
         # TODO: написать отображение графика эффективности
         self.graph.setPH(start_ph)
         # best_path_len = self.graph.lenRandomPath()
@@ -70,6 +70,24 @@ class ACO:
                 lastTime = time.time()
                 best_path_len = bpl
 
+    def run(self, ant_count, A, B, Q, evap, start_ph, worktime):
+        print("let's go")
+        # TODO: написать отображение графика эффективности
+        self.graph.setPH(start_ph)
+        best_path = []
+        # best_path_len = self.graph.lenRandomPath()
+        best_path_len = float("inf")
+        startTime = time.time()
+        lastTime = startTime
+        while time.time() - startTime < worktime:
+            bpl, bp = self.step(ant_count=ant_count, A=A, B=B, Q=Q, E=evap)
+            if best_path_len > bpl:
+                lastTime = time.time()
+                best_path_len = bpl
+                best_path = bp
+
+        return best_path
+
 
 if __name__ == "__main__":
     graph = Graph()
@@ -79,9 +97,10 @@ if __name__ == "__main__":
     graph.add_k_nearest(99)
 
     aco = ACO(graph)
-    start = time.time()
+    """start = time.time()
     print(aco.step(20, 1, 3, 100, 0.4))
     finish = time.time()
-    print(finish - start)
+    print(finish - start)"""
     """for _ in range(10):
         print(aco.run_performance(20, 1, 3, 100, 0.4, 0.4, 20))"""
+    print(aco.run(20, 1, 3, 5000, 0.1, 10, 5))
