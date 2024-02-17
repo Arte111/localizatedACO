@@ -92,7 +92,7 @@ class ACO:
         startTime = time.time()
         lastTime = startTime
         while time.time() - startTime < worktime:
-            bpl, _ = self.step(ant_count=ant_count, A=A, B=B, Q=Q, evap=evap)
+            bpl, _ = self.step(ant_count=ant_count, A=A, B=B, Q=Q, E=evap)
             if best_path_len > bpl:
                 performance += (time.time() - lastTime) * bpl
                 lastTime = time.time()
@@ -109,7 +109,7 @@ class ACO:
         startTime = time.time()
         lastTime = startTime
         while time.time() - startTime < worktime:
-            bpl, _ = self.step(ant_count=ant_count, A=A, B=B, Q=Q, evap=evap)
+            bpl, _ = self.step(ant_count=ant_count, A=A, B=B, Q=Q, E=evap)
             if best_path_len > bpl:
                 print(f"{time.time() - startTime} {bpl}")
                 lastTime = time.time()
@@ -125,19 +125,9 @@ if __name__ == "__main__":
 
     aco = ACO(graph)
     start = time.time()
-    aco.step(1, 1, 3, 100, 0.4)
-    aco.step(1, 1, 3, 100, 0.4)
-    aco.step(1, 1, 3, 100, 0.4)
-    aco.step(1, 1, 3, 100, 0.4)
-    aco.step(1, 1, 3, 100, 0.4)
-    aco.step(1, 1, 3, 100, 0.4)
-    aco.step(1, 1, 3, 100, 0.4)
-    aco.step(1, 1, 3, 100, 0.4)
-    aco.step(1, 1, 3, 100, 0.4)
-    aco.step(1, 1, 3, 100, 0.4)
-
-
+    aco.step(20, 1, 3, 100, 0.4)
     finish = time.time()
     print(finish - start)
     """for _ in range(10):
         print(aco.run_performance(20, 1, 3, 100, 0.4, 0.4, 20))"""
+
