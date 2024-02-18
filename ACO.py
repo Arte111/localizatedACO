@@ -1,4 +1,5 @@
 import os
+import random
 import time
 import numpy as np
 from numpy.ctypeslib import ndpointer
@@ -15,13 +16,16 @@ _step.argtypes = [_doublepp, _doublepp, ctypes.c_size_t, ctypes.c_size_t,
 
 _step.restype = ctypes.POINTER(ctypes.c_size_t)
 
+_init_rand = _dll.init_rand
+_init_rand.argtypes = [ctypes.c_size_t]
+_init_rand.restype = None
+
 
 class ACO:
     def __init__(self, graph):
         self.graph = graph
 
     def step(self, ant_count, A, B, Q, E):
-
         dmpp = (self.graph.distance_matrix.__array_interface__['data'][0] + np.arange(
             self.graph.distance_matrix.shape[0]) * self.graph.distance_matrix.strides[0]).astype(np.uintp)
         pmpp = (self.graph.pheromone_matrix.__array_interface__['data'][0] + np.arange(
@@ -90,6 +94,7 @@ class ACO:
 
 
 if __name__ == "__main__":
+    _init_rand(random.randint(0, 4294967295))
     graph = Graph()
     current_dir = os.path.dirname(os.path.abspath(__file__))
     file_path = os.path.join(current_dir, 'benchmarks', '2d100.txt')
@@ -103,4 +108,6 @@ if __name__ == "__main__":
     print(finish - start)"""
     """for _ in range(10):
         print(aco.run_performance(20, 1, 3, 100, 0.4, 0.4, 20))"""
-    print(aco.run(20, 1, 3, 5000, 0.1, 10, 5))
+    path = aco.run(100, 1, 2, 400, 0.4, 0.4, 30)
+    graph.visualize_best_path_2d(path)
+    #aco.step(100, 1, 2, 500, 0.2)

@@ -46,6 +46,22 @@ class Graph:
     def setPH(self, ph):
         self.pheromone_matrix = np.full((len(self.cords), len(self.cords)), ph, dtype="double")
 
+    def visualize_best_path_2d(self, best_path):
+        fig, ax = plt.subplots()
+
+        xs = [n[0] for n in self.cords]
+        ys = [n[1] for n in self.cords]
+        ax.scatter(xs, ys)
+
+        for i in range(len(best_path) - 1):
+            x_start, y_start = self.cords[best_path[i]]
+            x_end, y_end = self.cords[best_path[i+1]]
+            ax.plot([x_start, x_end], [y_start, y_end], 'g')
+
+        ax.set_xlabel('X')
+        ax.set_ylabel('Y')
+        plt.show()
+
 
 if __name__ == "__main__":
     import os
