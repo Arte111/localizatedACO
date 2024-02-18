@@ -89,7 +89,6 @@ class ACO:
                 lastTime = time.time()
                 best_path_len = bpl
                 best_path = bp
-
         return best_path
 
 
@@ -98,7 +97,7 @@ if __name__ == "__main__":
     graph = Graph()
     current_dir = os.path.dirname(os.path.abspath(__file__))
     file_path = os.path.join(current_dir, 'benchmarks', '2d100.txt')
-    graph.load(file_path, ph=0.4)
+    graph.load(file_path, ph=0.5)
     graph.add_k_nearest(99)
 
     aco = ACO(graph)
@@ -108,6 +107,6 @@ if __name__ == "__main__":
     print(finish - start)"""
     """for _ in range(10):
         print(aco.run_performance(20, 1, 3, 100, 0.4, 0.4, 20))"""
-    path = aco.run(100, 1, 2, 400, 0.4, 0.4, 30)
+    path = aco.run(100, 1, 3, 500, 0.3, 0.5, 30)
     graph.visualize_best_path_2d(path)
-    #aco.step(100, 1, 2, 500, 0.2)
+    # aco.step(100, 1, 2, 500, 0.2)
