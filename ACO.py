@@ -82,8 +82,8 @@ class ACO:
     def run_performance(self, ant_count, A, B, Q, evap, start_ph, worktime):
         performance = 0
         self.graph.setPH(start_ph)
-        # best_path_len = self.lenRandomPath()
-        best_path_len = float("inf")
+        best_path_len = self.graph.lenRandomPath()
+        # best_path_len = float("inf")
         startTime = time.time()
         lastTime = startTime
         while time.time() - startTime < worktime:
@@ -118,16 +118,5 @@ if __name__ == "__main__":
     graph.add_k_nearest_edges(99)
 
     aco = ACO(graph)
-    start = time.time()
-    aco.step(20, 1, 3, 100, 0.4)
-    aco.step(20, 1, 3, 100, 0.4)
-    aco.step(20, 1, 3, 100, 0.4)
-    aco.step(20, 1, 3, 100, 0.4)
-    aco.step(20, 1, 3, 100, 0.4)
-    aco.step(20, 1, 3, 100, 0.4)
-    aco.step(20, 1, 3, 100, 0.4)
-    aco.step(20, 1, 3, 100, 0.4)
-    aco.step(20, 1, 3, 100, 0.4)
-    aco.step(20, 1, 3, 100, 0.4)
-    finish = time.time()
-    print(finish - start)
+    for _ in range(10):
+        print(aco.run_performance(20, 1, 3, 100, 0.4, 0.4, 20))
