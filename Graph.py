@@ -46,6 +46,13 @@ class Graph:
     def setPH(self, ph):
         self.pheromone_matrix = np.full((len(self.cords), len(self.cords)), ph, dtype="double")
 
+    def lenRandomPath(self):
+        l = 0
+        for i in range(len(self.distance_matrix) - 1):
+            l += self.distance_matrix[i][i+1]
+        l += self.distance_matrix[1][len(self.distance_matrix) - 1]
+        return l
+
     def visualize_best_path_2d(self, best_path):
         fig, ax = plt.subplots()
 
