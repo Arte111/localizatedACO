@@ -89,6 +89,8 @@ class ACO:
                 lastTime = time.time()
                 best_path_len = bpl
                 best_path = bp
+
+        print(best_path_len)
         return best_path
 
 
