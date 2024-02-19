@@ -107,7 +107,7 @@ if __name__ == "__main__":
     print(aco.step(20, 1, 3, 100, 0.4))
     finish = time.time()
     print(finish - start)"""
-    for _ in range(10):
-        print(aco.run_performance(20, 1, 3, 100, 0.4, 0.4, 20))
-    # aco.run_print(100, 1, 3, 500, 0.3, 0.5, 5)
-    # aco.step(100, 1, 2, 500, 0.2)
+    """for _ in range(10):
+        print(aco.run_performance(20, 1, 3, 100, 0.4, 0.4, 20))"""
+    bp = aco.run(100, 1, 3, 500, 0.3, 0.5, 5)
+    graph.visualize_best_path_2d(bp)
