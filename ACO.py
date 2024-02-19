@@ -98,9 +98,9 @@ if __name__ == "__main__":
     _init_rand(random.randint(0, 4294967295))
     graph = Graph()
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    file_path = os.path.join(current_dir, 'benchmarks', '2d100.txt')
+    file_path = os.path.join(current_dir, 'benchmarks', '2d300.txt')
     graph.load(file_path, ph=0.5)
-    graph.add_k_nearest(99)
+    graph.add_k_nearest(100)
 
     aco = ACO(graph)
     """start = time.time()
@@ -109,5 +109,6 @@ if __name__ == "__main__":
     print(finish - start)"""
     """for _ in range(10):
         print(aco.run_performance(20, 1, 3, 100, 0.4, 0.4, 20))"""
-    bp = aco.run(100, 1, 3, 500, 0.3, 0.5, 5)
-    graph.visualize_best_path_2d(bp)
+    """bp = aco.run(300, 1, 3, 12500, 0.3, 1, 180)
+    graph.visualize_best_path_2d(bp)"""
+    aco.run_print(300, 1, 3, 12_500, 0.3, 1, 5*60)
