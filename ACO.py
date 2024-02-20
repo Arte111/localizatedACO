@@ -45,7 +45,7 @@ class ACO:
 
     def run_performance(self, ant_count, A, B, Q, evap, start_ph, worktime):
         performance = 0
-        self.graph.setPH(start_ph)
+        self.graph.setPH(ph=start_ph)
         best_path_len = self.graph.lenRandomPath()
         # best_path_len = float("inf")
         startTime = time.time()

@@ -23,7 +23,7 @@ class Graph:
         self.distance_matrix = cdist(self.cords, self.cords, 'euclidean')
         self.pheromone_matrix = np.full((len(self.cords), len(self.cords)), ph, dtype="double")
 
-    def add_k_nearest(self, k):
+    def add_k_nearest_edges(self, k):
         if k >= len(self.cords) - 1:
             k = len(self.cords) - 2
         for i in self.distance_matrix:
