@@ -1,6 +1,8 @@
 import os
 import random
 import time
+from pprint import pprint
+
 import numpy as np
 from numpy.ctypeslib import ndpointer
 import ctypes
@@ -26,8 +28,8 @@ class ACO:
         self.graph = graph
 
     def step(self, ant_count, A, B, Q, E):
-        dmpp = (self.graph.distance_matrix.__array_interface__['data'][0] + np.arange(
-            self.graph.distance_matrix.shape[0]) * self.graph.distance_matrix.strides[0]).astype(np.uintp)
+        dmpp = (self.graph.closeness_matrix.__array_interface__['data'][0] + np.arange(
+            self.graph.closeness_matrix.shape[0]) * self.graph.closeness_matrix.strides[0]).astype(np.uintp)
         pmpp = (self.graph.pheromone_matrix.__array_interface__['data'][0] + np.arange(
             self.graph.pheromone_matrix.shape[0]) * self.graph.pheromone_matrix.strides[0]).astype(np.uintp)
         node_count = ctypes.c_size_t(self.graph.pheromone_matrix.shape[0])
@@ -37,25 +39,35 @@ class ACO:
         Q = ctypes.c_double(Q)
         E = ctypes.c_double(E)
         bpl = ctypes.c_double()
-        result_ptr = _step(dmpp, pmpp, node_count, ant_count, A, B, Q, E, ctypes.byref(bpl))
-
+        try:
+            result_ptr = _step(dmpp, pmpp, node_count, ant_count, A, B, Q, E, ctypes.byref(bpl))
+        except OSError:
+            print("OSError")
+            return float("inf"), []
         # Преобразование указателя в массив
         better_path = np.ctypeslib.as_array(result_ptr, shape=(1, node_count.value))[0]
         return bpl.value, better_path
 
     def run_performance(self, ant_count, A, B, Q, evap, start_ph, worktime):
-        performance = 0
+        performances = []
         self.graph.setPH(ph=start_ph)
         best_path_len = self.graph.lenRandomPath()
         # best_path_len = float("inf")
         startTime = time.time()
-        lastTime = startTime
         while time.time() - startTime < worktime:
             bpl, _ = self.step(ant_count=ant_count, A=A, B=B, Q=Q, E=evap)
             if best_path_len > bpl:
-                performance += (time.time() - lastTime) * bpl
-                lastTime = time.time()
+                performances.append((time.time() - startTime, bpl))
                 best_path_len = bpl
+
+        performance = 0
+        for i in range(1, len(performances)):
+            performance += (performances[i][0] - performances[i-1][0]) * performances[i][1]
+
+        if performances[-1][0] > worktime:
+            performance -= (performances[-1][0] - worktime) * performances[-1][1]
+        else:
+            performance += (worktime - performances[-1][0]) * performances[-1][1]
 
         return performance
 
@@ -66,12 +78,10 @@ class ACO:
         # best_path_len = self.graph.lenRandomPath()
         best_path_len = float("inf")
         startTime = time.time()
-        lastTime = startTime
         while time.time() - startTime < worktime:
             bpl, _ = self.step(ant_count=ant_count, A=A, B=B, Q=Q, E=evap)
             if best_path_len > bpl:
                 print(f"{time.time() - startTime} {bpl}")
-                lastTime = time.time()
                 best_path_len = bpl
 
     def run(self, ant_count, A, B, Q, evap, start_ph, worktime):
@@ -82,11 +92,9 @@ class ACO:
         # best_path_len = self.graph.lenRandomPath()
         best_path_len = float("inf")
         startTime = time.time()
-        lastTime = startTime
         while time.time() - startTime < worktime:
             bpl, bp = self.step(ant_count=ant_count, A=A, B=B, Q=Q, E=evap)
             if best_path_len > bpl:
-                lastTime = time.time()
                 best_path_len = bpl
                 best_path = bp
 
@@ -98,17 +106,18 @@ if __name__ == "__main__":
     _init_rand(random.randint(0, 4294967295))
     graph = Graph()
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    file_path = os.path.join(current_dir, 'benchmarks', '2d300.txt')
+    file_path = os.path.join(current_dir, 'benchmarks', '2d100.txt')
     graph.load(file_path, ph=0.5)
-    graph.add_k_nearest(100)
+    graph.add_k_nearest_edges(99)
 
     aco = ACO(graph)
     """start = time.time()
-    print(aco.step(20, 1, 3, 100, 0.4))
+    for _ in range(100):
+        aco.step(20, 1, 3, 100, 0.4)
     finish = time.time()
     print(finish - start)"""
     """for _ in range(10):
         print(aco.run_performance(20, 1, 3, 100, 0.4, 0.4, 20))"""
     """bp = aco.run(300, 1, 3, 12500, 0.3, 1, 180)
     graph.visualize_best_path_2d(bp)"""
-    aco.run_print(300, 1, 3, 12_500, 0.3, 1, 5*60)
+    print(aco.run_performance(20, 1, 3, 100, 0.4, 1, 5))
