@@ -11,6 +11,7 @@ class Graph:
     def __init__(self):
         self.cords = np.empty(shape=(0, 0), dtype="double")
         self.distance_matrix = np.empty(shape=(0, 0), dtype="double")
+        self.closeness_matrix = np.empty(shape=(0, 0), dtype="double")
         self.pheromone_matrix = np.empty(shape=(0, 0), dtype="double")
 
     def load(self, path, ph=0):
@@ -37,6 +38,14 @@ class Graph:
                 self.distance_matrix[j][i] = max(self.distance_matrix[i][j], self.distance_matrix[j][i])
                 self.distance_matrix[i][j] = self.distance_matrix[j][i]
 
+        self.closeness_matrix = self.distance_matrix.copy()
+        for i in range(len(self.closeness_matrix)):
+            for j in range(len(self.closeness_matrix)):
+                if self.closeness_matrix[i][j] == 0:
+                    self.closeness_matrix[i][j] = 0
+                    continue
+                self.closeness_matrix[i][j] = 200 / self.closeness_matrix[i][j]
+
     def __len__(self):
         return len(self.cords)
 
@@ -49,7 +58,7 @@ class Graph:
     def lenRandomPath(self):
         l = 0
         for i in range(len(self.distance_matrix) - 1):
-            l += self.distance_matrix[i][i+1]
+            l += self.distance_matrix[i][i + 1]
         l += self.distance_matrix[1][len(self.distance_matrix) - 1]
         return l
 
@@ -62,7 +71,7 @@ class Graph:
 
         for i in range(len(best_path) - 1):
             x_start, y_start = self.cords[best_path[i]]
-            x_end, y_end = self.cords[best_path[i+1]]
+            x_end, y_end = self.cords[best_path[i + 1]]
             ax.plot([x_start, x_end], [y_start, y_end], 'g')
 
         ax.set_xlabel('X')

@@ -14,10 +14,9 @@ if __name__ == "__main__":
     aco = ACO(graph)
     parameters = {
         "ant_count": range(20, 150, 10),
-        "A": [0.5, 1, 1.5, 2, 3, 4],
-        "B": [0.5, 1, 1.5, 2, 3, 4],
-        "Q": range(100, 5000, 200),
-        "evap": [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8],
+        "B": [0.25, 0.5, 1, 1.5, 2, 3, 4],
+        "Q": range(10, 1000, 50),
+        "evap": [0.1, 0.2, 0.3, 0.4, 0.5, 0.6],
         "start_ph": [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
     }
 
@@ -35,7 +34,7 @@ if __name__ == "__main__":
         for individual in population:
             all_perfomance = [aco.run_performance(ant_count=individual["ant_count"], A=individual["A"], B=individual["B"],
                                                   Q=individual["Q"], evap=individual["evap"], start_ph=individual["start_ph"],
-                                                  worktime=aco_worktime) for _ in range(10)]
+                                                  worktime=aco_worktime) for _ in range(5)]
             individual["performance"] = statistics.mean(all_perfomance)
 
         # selection
