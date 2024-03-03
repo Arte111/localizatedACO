@@ -69,6 +69,8 @@ class ACO:
         else:
             performance += (worktime - performances[-1][0]) * performances[-1][1]
 
+        performance += best_path_len * 3 * worktime
+
         return performance
 
     def run_print(self, ant_count, A, B, Q, evap, start_ph, worktime):
@@ -85,8 +87,6 @@ class ACO:
                 best_path_len = bpl
 
     def run(self, ant_count, A, B, Q, evap, start_ph, worktime):
-        print("let's go")
-        # TODO: написать отображение графика эффективности
         self.graph.setPH(start_ph)
         best_path = []
         # best_path_len = self.graph.lenRandomPath()
@@ -108,7 +108,7 @@ if __name__ == "__main__":
     current_dir = os.path.dirname(os.path.abspath(__file__))
     file_path = os.path.join(current_dir, 'benchmarks', '2d100.txt')
     graph.load(file_path, ph=0.5)
-    graph.add_k_nearest_edges(99)
+    graph.add_k_nearest_edges(100)
 
     aco = ACO(graph)
     """start = time.time()
@@ -117,7 +117,7 @@ if __name__ == "__main__":
     finish = time.time()
     print(finish - start)"""
     """for _ in range(10):
-        print(aco.run_performance(20, 1, 3, 100, 0.4, 0.4, 20))"""
-    """bp = aco.run(300, 1, 3, 12500, 0.3, 1, 180)
-    graph.visualize_best_path_2d(bp)"""
-    print(aco.run_performance(20, 1, 3, 100, 0.4, 1, 5))
+        print(aco.run_performance(500, 3, 10, 650, 0.4, 0.75, 3))"""
+    bp = aco.run(120, 2, 7, 600, 0.2, 0.7, 3)
+    graph.visualize_best_path_2d(bp)
+    print(aco.run_performance(120, 2, 7, 600, 0.2, 0.7, 3))

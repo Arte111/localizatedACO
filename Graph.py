@@ -87,4 +87,4 @@ if __name__ == "__main__":
     file_path = os.path.join(current_dir, 'benchmarks', '2d100.txt')
     g.load(file_path)
 
-    g.add_k_nearest(20)
+    g.add_k_nearest_edges(20)
