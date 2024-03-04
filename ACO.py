@@ -118,6 +118,6 @@ if __name__ == "__main__":
     print(finish - start)"""
     """for _ in range(10):
         print(aco.run_performance(500, 3, 10, 650, 0.4, 0.75, 3))"""
-    bp = aco.run(120, 2, 7, 600, 0.2, 0.7, 3)
+    bp = aco.run(490, 3, 7, 900, 0.2, 0.1, 2)
     graph.visualize_best_path_2d(bp)
-    print(aco.run_performance(120, 2, 7, 600, 0.2, 0.7, 3))
+    print(aco.run_performance(420, 1.4, 5.6, 400, 0.38, 0.18, 2))
