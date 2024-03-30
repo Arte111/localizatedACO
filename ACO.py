@@ -1,7 +1,6 @@
 import os
 import random
 import time
-from pprint import pprint
 
 import numpy as np
 from numpy.ctypeslib import ndpointer
@@ -10,7 +9,8 @@ from Graph import Graph
 
 _doublepp = ndpointer(dtype=np.uintp, ndim=1, flags='C')
 
-_dll = ctypes.CDLL('D:/projects/testsyka/x64/Debug/testsyka.dll')
+# _dll = ctypes.CDLL('D:/projects/pyaco/testsyka.dll')
+_dll = ctypes.CDLL('D:/projects/testsyka/x64/Debug/test/testsyka.dll')
 
 _step = _dll.step
 _step.argtypes = [_doublepp, _doublepp, ctypes.c_size_t, ctypes.c_size_t,
@@ -62,7 +62,7 @@ class ACO:
 
         performance = 0
         for i in range(1, len(performances)):
-            performance += (performances[i][0] - performances[i-1][0]) * performances[i][1]
+            performance += (performances[i][0] - performances[i - 1][0]) * performances[i][1]
 
         if performances[-1][0] > worktime:
             performance -= (performances[-1][0] - worktime) * performances[-1][1]
@@ -97,6 +97,7 @@ class ACO:
             if best_path_len > bpl:
                 best_path_len = bpl
                 best_path = bp
+                print(f"{time.time() - startTime} {bpl}")
 
         print(best_path_len)
         return best_path
@@ -106,18 +107,25 @@ if __name__ == "__main__":
     _init_rand(random.randint(0, 4294967295))
     graph = Graph()
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    file_path = os.path.join(current_dir, 'benchmarks', '2d100.txt')
+    file_path = os.path.join(current_dir, 'benchmarks', '2d300.txt')
     graph.load(file_path, ph=0.5)
-    graph.add_k_nearest_edges(100)
+    graph.add_k_nearest_edges(99)
 
     aco = ACO(graph)
+    bp = aco.run(300, 3, 9, 3000, 0.30, 0.50, 300)
     """start = time.time()
-    for _ in range(100):
-        aco.step(20, 1, 3, 100, 0.4)
+    for _ in range(1):
+        aco.step(100_000, 1, 2, 200, 0.2)
     finish = time.time()
     print(finish - start)"""
+    graph.visualize_best_path_2d(bp)
     """for _ in range(10):
         print(aco.run_performance(500, 3, 10, 650, 0.4, 0.75, 3))"""
-    bp = aco.run(490, 3, 7, 900, 0.2, 0.1, 2)
-    graph.visualize_best_path_2d(bp)
-    print(aco.run_performance(420, 1.4, 5.6, 400, 0.38, 0.18, 2))
+    # graph.visualize_best_path_2d(bp)
+    # bp = aco.run(100, 2.85, 8.39, 400, 0.20, 0.50, 60)
+    # print(aco.run_performance(100, 2.85, 8.39, 400, 0.20, 0.50, 10))
+    # 462, 3.69, 7.05, 7147, 0.23, 0.63, 3
+    # 483, 0.95, 6.16, 4990, 0.54, 0.38, 3
+    # 474, 2.69, 6.05, 738.1, 0.2, 0.47, 3
+    # 469, 2.53, 7.27, 8045, 0.43, 0.71, 3
+    # 100, 1.48, 8.18, 1078, 0.20, 0.50, 3

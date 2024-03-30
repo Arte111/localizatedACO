@@ -50,7 +50,20 @@ class Graph:
         return len(self.cords)
 
     def evaporation(self, evaporation):
-        self.pheromone_matrix += 1 - evaporation
+        self.pheromone_matrix *= 1 - evaporation
+
+    def add_ph(self, better_path, better_path_len, Q):
+        ph = Q / better_path_len
+        for i in range(len(self.pheromone_matrix) - 1):
+            self.pheromone_matrix[better_path[i]][better_path[i + 1]] += ph
+            self.pheromone_matrix[better_path[i + 1]][better_path[i]] += ph
+        self.pheromone_matrix[better_path[0]][better_path[len(self.pheromone_matrix) - 1]] += ph
+        self.pheromone_matrix[better_path[len(self.pheromone_matrix) - 1]][better_path[0]] += ph
+
+        for i in range(len(self.pheromone_matrix)):
+            for j in range(len(self.pheromone_matrix)):
+                if self.pheromone_matrix[i][j] > 1:
+                    self.pheromone_matrix[i][j] = 1
 
     def setPH(self, ph):
         self.pheromone_matrix = np.full((len(self.cords), len(self.cords)), ph, dtype="double")

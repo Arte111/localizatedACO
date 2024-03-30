@@ -14,15 +14,15 @@ if __name__ == "__main__":
     graph.add_k_nearest_edges(99)
     aco = ACO(graph)
     parameters = {
-        "ant_count": range(100, 500, 10),
-        "A": [0.25, 0.5, 1, 1.5, 2, 3, 4],
-        "B": [3, 4, 5, 6, 7],
+        "ant_count": [100],
+        "A": [0.25, 0.5, 1, 1.5, 2, 3, 4, 5],
+        "B": [3, 4, 5, 6, 7, 8, 9, 10, 11],
         "Q": range(500, 10000, 500),
-        "evap": [0.1, 0.2, 0.3, 0.4, 0.5, 0.6],
-        "start_ph": [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
+        "evap": [0.2],
+        "start_ph": [0.5],
     }
 
-    population_size = 10
+    population_size = 128
     population = []
 
     for i in range(population_size):
@@ -38,20 +38,18 @@ if __name__ == "__main__":
             all_perfomance = [
                 aco.run_performance(ant_count=int(individual["ant_count"]), A=individual["A"], B=individual["B"],
                                     Q=individual["Q"], evap=individual["evap"], start_ph=individual["start_ph"],
-                                    worktime=aco_worktime) for _ in range(10)]
+                                    worktime=aco_worktime) for _ in range(50)]
             individual["performance"] = statistics.mean(all_perfomance)
             s += individual["performance"]
             print(individual)
 
-        print(f"avg {s // 10}")
+        print(f"avg {s // population_size}")
 
         print(min(population, key=lambda x: x["performance"]))
 
-        # selection
-        temp = []
-        for _ in population:
-            temp.append(min(random.choices(population, k=2), key=lambda x: x["performance"]))
-        population = temp.copy()
+        # elitism
+        elite_size = int(population_size * 0.3)
+        elite = sorted(population, key=lambda x: x["performance"])[:elite_size]
 
 
         def crossover(mommy, daddy):
@@ -59,20 +57,21 @@ if __name__ == "__main__":
             for j in ["ant_count", "A", "B", "Q", "evap", "start_ph"]:
                 minj = min(mommy[j], daddy[j])
                 maxj = max(mommy[j], daddy[j])
-                dmin = minj - 1 * (maxj - minj)
-                dmax = minj + 1 * (maxj - minj)
+                dmin = minj - 0.25 * (maxj - minj)
+                dmax = minj + 0.25 * (maxj - minj)
                 child[j] = random.uniform(dmin, dmax)
 
             for key in child:
                 child[key] = round(abs(child[key]), 2)
-            if child["evap"] > 0.99: child["evap"] = 0.99
+            if child["evap"] > 0.99:
+                child["evap"] = 0.99
 
             return child
 
 
         def mutate(child):
             for i in ["ant_count", "A", "B", "Q", "evap", "start_ph"]:
-                if random.random() < 0.15:
+                if random.random() < 0.5:
                     child[i] = random.triangular(min(parameters[i]), max(parameters[i]),
                                                  random.gauss(child[i], child[i] * 0.2))
 
@@ -85,13 +84,11 @@ if __name__ == "__main__":
         # crossing and mutate
         offspring = []
 
-        for j in range(0, len(population), 2):
-            if random.random() < 0.95:
-                offspring.append(crossover(population[j], population[j + 1]))
-                offspring.append(crossover(population[j], population[j + 1]))
-            else:
-                offspring.append(population[j])
-                offspring.append(population[j+1])
+        for i in range(population_size - elite_size):
+            parent1 = random.choice(elite)
+            parent2 = random.choice(elite)
+            child = crossover(parent1, parent2)
+            child = mutate(child)
+            offspring.append(child)
 
-        map(mutate, offspring)
-        population = offspring.copy()
+        population = elite + offspring
