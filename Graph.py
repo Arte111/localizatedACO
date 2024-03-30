@@ -185,3 +185,9 @@ class Graph:
 
     def randomNode(self):
         return np.random.choice(self.graph)
+
+
+if __name__ == '__main__':
+    g = Graph()
+    g.generate_random_graph(300, 4)
+    g.upload("temp.txt")
