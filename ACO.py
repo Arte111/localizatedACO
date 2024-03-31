@@ -9,8 +9,7 @@ from Graph import Graph
 
 _doublepp = ndpointer(dtype=np.uintp, ndim=1, flags='C')
 
-# _dll = ctypes.CDLL('D:/projects/pyaco/testsyka.dll')
-_dll = ctypes.CDLL('D:/projects/testsyka/x64/Debug/test/testsyka.dll')
+_dll = ctypes.CDLL('testsyka.dll')
 
 _step = _dll.step
 _step.argtypes = [_doublepp, _doublepp, ctypes.c_size_t, ctypes.c_size_t,
@@ -41,18 +40,19 @@ class ACO:
         bpl = ctypes.c_double()
         try:
             result_ptr = _step(dmpp, pmpp, node_count, ant_count, A, B, Q, E, ctypes.byref(bpl))
-        except OSError:
-            print("OSError")
+        except:
+            print("Error")
             return float("inf"), []
         # Преобразование указателя в массив
         better_path = np.ctypeslib.as_array(result_ptr, shape=(1, node_count.value))[0]
         return bpl.value, better_path
 
-    def run_performance(self, ant_count, A, B, Q, evap, start_ph, worktime):
+    def run_performance(self, ant_count, A, B, Q, evap, start_ph, worktime, fine):
         performances = []
         self.graph.setPH(ph=start_ph)
-        best_path_len = self.graph.lenRandomPath()
+        # best_path_len = self.graph.lenRandomPath()
         # best_path_len = float("inf")
+        best_path_len = fine
         startTime = time.time()
         while time.time() - startTime < worktime:
             bpl, _ = self.step(ant_count=ant_count, A=A, B=B, Q=Q, E=evap)
@@ -105,20 +105,28 @@ class ACO:
 
 if __name__ == "__main__":
     _init_rand(random.randint(0, 4294967295))
-    graph = Graph()
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    file_path = os.path.join(current_dir, 'benchmarks', '2d300.txt')
-    graph.load(file_path, ph=0.5)
-    graph.add_k_nearest_edges(99)
+    with open("logs.txt", "w") as file:
+        for k in range(300, 50, -10):
+            graph = Graph()
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            file_path = os.path.join(current_dir, 'benchmarks', f'6d300.txt')
+            graph.load(file_path, ph=0.5)
+            graph.add_k_nearest_edges(k)
 
-    aco = ACO(graph)
-    bp = aco.run(300, 3, 9, 3000, 0.30, 0.50, 300)
+            aco = ACO(graph)
+            res = []
+            for _ in range(10):
+                res.append(aco.run_performance(300, 3, 9, 7200, 0.30, 0.50, 20, 48_000))
+
+            print(f"{k} {res}")
+            print(f"{k} {res}", file=file)
+
     """start = time.time()
     for _ in range(1):
         aco.step(100_000, 1, 2, 200, 0.2)
     finish = time.time()
     print(finish - start)"""
-    graph.visualize_best_path_2d(bp)
+    # graph.visualize_best_path_2d(bp)
     """for _ in range(10):
         print(aco.run_performance(500, 3, 10, 650, 0.4, 0.75, 3))"""
     # graph.visualize_best_path_2d(bp)
