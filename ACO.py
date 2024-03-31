@@ -9,7 +9,7 @@ from Graph import Graph
 
 _doublepp = ndpointer(dtype=np.uintp, ndim=1, flags='C')
 
-_dll = ctypes.CDLL('testsyka.dll')
+_dll = ctypes.CDLL('D:/projects/pyaco/testsyka.dll')
 
 _step = _dll.step
 _step.argtypes = [_doublepp, _doublepp, ctypes.c_size_t, ctypes.c_size_t,
@@ -41,7 +41,7 @@ class ACO:
         try:
             result_ptr = _step(dmpp, pmpp, node_count, ant_count, A, B, Q, E, ctypes.byref(bpl))
         except:
-            print("Error")
+            # print("Error")
             return float("inf"), []
         # Преобразование указателя в массив
         better_path = np.ctypeslib.as_array(result_ptr, shape=(1, node_count.value))[0]
@@ -106,17 +106,15 @@ class ACO:
 if __name__ == "__main__":
     _init_rand(random.randint(0, 4294967295))
     with open("logs.txt", "w") as file:
-        for k in range(300, 50, -10):
+        for k in range(100, 15, -5):
             graph = Graph()
             current_dir = os.path.dirname(os.path.abspath(__file__))
-            file_path = os.path.join(current_dir, 'benchmarks', f'6d300.txt')
+            file_path = os.path.join(current_dir, 'benchmarks', f'2d100.txt')
             graph.load(file_path, ph=0.5)
             graph.add_k_nearest_edges(k)
 
             aco = ACO(graph)
-            res = []
-            for _ in range(10):
-                res.append(aco.run_performance(300, 3, 9, 7200, 0.30, 0.50, 20, 48_000))
+            res = [aco.run_performance(100, 3, 9, 500, 0.30, 0.50, 5, 3_000) for _ in range(5)]
 
             print(f"{k} {res}")
             print(f"{k} {res}", file=file)
