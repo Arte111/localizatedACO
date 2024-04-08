@@ -14,7 +14,6 @@ _dll = ctypes.CDLL('D:/projects/pyaco/testsyka.dll')
 _step = _dll.step
 _step.argtypes = [_doublepp, _doublepp, ctypes.c_size_t, ctypes.c_size_t,
                   ctypes.c_double, ctypes.c_double, ctypes.c_double, ctypes.c_double, ctypes.POINTER(ctypes.c_double)]
-
 _step.restype = ctypes.POINTER(ctypes.c_size_t)
 
 _init_rand = _dll.init_rand
@@ -64,10 +63,13 @@ class ACO:
         for i in range(1, len(performances)):
             performance += (performances[i][0] - performances[i - 1][0]) * performances[i][1]
 
-        if performances[-1][0] > worktime:
-            performance -= (performances[-1][0] - worktime) * performances[-1][1]
-        else:
-            performance += (worktime - performances[-1][0]) * performances[-1][1]
+        try:
+            if performances[-1][0] > worktime:
+                performance -= (performances[-1][0] - worktime) * performances[-1][1]
+            else:
+                performance += (worktime - performances[-1][0]) * performances[-1][1]
+        except IndexError:
+            pass
 
         performance += best_path_len * 3 * worktime
 
@@ -97,7 +99,7 @@ class ACO:
             if best_path_len > bpl:
                 best_path_len = bpl
                 best_path = bp
-                print(f"{time.time() - startTime} {bpl}")
+                # print(f"{time.time() - startTime} {bpl}")
 
         print(best_path_len)
         return best_path
@@ -105,30 +107,56 @@ class ACO:
 
 if __name__ == "__main__":
     _init_rand(random.randint(0, 4294967295))
-    with open("logs.txt", "w") as file:
-        for k in range(100, 15, -5):
-            graph = Graph()
-            current_dir = os.path.dirname(os.path.abspath(__file__))
-            file_path = os.path.join(current_dir, 'benchmarks', f'2d100.txt')
-            graph.load(file_path, ph=0.5)
+
+
+    """with open("logs.txt", "w") as file:
+        graph = Graph()
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        file_path = os.path.join(current_dir, 'benchmarks', f'4d1000.txt')
+        graph.load(file_path, ph=0.5)
+        graph.add_k_nearest_edges(999)
+
+        aco = ACO(graph)
+        aco.run(1000, 3, 9, 10_000, 0.3, 0.5, 2_000)"""
+
+    """with open("logs.txt", "w") as file:
+        graph = Graph()
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        file_path = os.path.join(current_dir, 'benchmarks', f'4d1000.txt')
+        graph.load(file_path, ph=0.5)
+
+        for k in range(500, 100, -100):
             graph.add_k_nearest_edges(k)
 
             aco = ACO(graph)
-            res = [aco.run_performance(100, 3, 9, 500, 0.30, 0.50, 5, 3_000) for _ in range(5)]
+            res = [aco.run_performance(ant_count=1000,
+                                       A=3,
+                                       B=9,
+                                       Q=10_000,
+                                       evap=0.30,
+                                       start_ph=0.50,
+                                       worktime=2000,
+                                       fine=70_000) for _ in range(5)]
 
             print(f"{k} {res}")
-            print(f"{k} {res}", file=file)
+            print(f"{k} {res}", file=file)"""
 
     """start = time.time()
     for _ in range(1):
         aco.step(100_000, 1, 2, 200, 0.2)
     finish = time.time()
     print(finish - start)"""
+    graph = Graph()
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    file_path = os.path.join(current_dir, 'benchmarks', f'2d100.txt')
+    graph.load(file_path, ph=0.5)
+    graph.add_k_nearest_edges(99)
+    aco = ACO(graph)
     # graph.visualize_best_path_2d(bp)
     """for _ in range(10):
-        print(aco.run_performance(500, 3, 10, 650, 0.4, 0.75, 3))"""
+        print(aco.run_performance(500, 3, 10, 650, 0.4, 0.75, 3, 5000))"""
+    aco.run(100, 3, 9, 400, 0.3, 0.5, 2)
     # graph.visualize_best_path_2d(bp)
-    # bp = aco.run(100, 2.85, 8.39, 400, 0.20, 0.50, 60)
     # print(aco.run_performance(100, 2.85, 8.39, 400, 0.20, 0.50, 10))
     # 462, 3.69, 7.05, 7147, 0.23, 0.63, 3
     # 483, 0.95, 6.16, 4990, 0.54, 0.38, 3
