@@ -118,5 +118,4 @@ if __name__ == "__main__":
     graph.add_k_nearest_edges(99)
 
     aco = ACO(graph)
-    for _ in range(10):
-        print(aco.run_performance(20, 1, 3, 100, 0.4, 0.4, 20))
+    aco.run_print(100, 3, 9, 400, 0.3, 0.5, 100)
