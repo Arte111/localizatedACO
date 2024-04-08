@@ -99,7 +99,7 @@ class ACO:
             if best_path_len > bpl:
                 best_path_len = bpl
                 best_path = bp
-                # print(f"{time.time() - startTime} {bpl}")
+                print(f"{time.time() - startTime} {bpl}")
 
         print(best_path_len)
         return best_path
@@ -148,14 +148,14 @@ if __name__ == "__main__":
     print(finish - start)"""
     graph = Graph()
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    file_path = os.path.join(current_dir, 'benchmarks', f'2d100.txt')
+    file_path = os.path.join(current_dir, 'benchmarks', f'2d300.txt')
     graph.load(file_path, ph=0.5)
-    graph.add_k_nearest_edges(99)
+    graph.add_k_nearest_edges(299)
     aco = ACO(graph)
     # graph.visualize_best_path_2d(bp)
     """for _ in range(10):
         print(aco.run_performance(500, 3, 10, 650, 0.4, 0.75, 3, 5000))"""
-    aco.run(100, 3, 9, 400, 0.3, 0.5, 2)
+    aco.run(300, 3, 9, 400, 0.3, 0.5, 20)
     # graph.visualize_best_path_2d(bp)
     # print(aco.run_performance(100, 2.85, 8.39, 400, 0.20, 0.50, 10))
     # 462, 3.69, 7.05, 7147, 0.23, 0.63, 3
