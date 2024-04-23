@@ -9,14 +9,16 @@ from Graph import Graph
 
 _doublepp = ndpointer(dtype=np.uintp, ndim=1, flags='C')
 
-_dll = ctypes.CDLL('D:/projects/pyaco/testsyka.dll')
+current_dir = os.path.dirname(os.path.abspath(__file__))
+file_path = os.path.join(current_dir, f'testsyka.dll')
+_external_ant_colony = ctypes.CDLL(file_path)
 
-_step = _dll.step
+_step = _external_ant_colony.step
 _step.argtypes = [_doublepp, _doublepp, ctypes.c_size_t, ctypes.c_size_t,
                   ctypes.c_double, ctypes.c_double, ctypes.c_double, ctypes.c_double, ctypes.POINTER(ctypes.c_double)]
 _step.restype = ctypes.POINTER(ctypes.c_size_t)
 
-_init_rand = _dll.init_rand
+_init_rand = _external_ant_colony.init_rand
 _init_rand.argtypes = [ctypes.c_size_t]
 _init_rand.restype = None
 
@@ -108,7 +110,6 @@ class ACO:
 if __name__ == "__main__":
     _init_rand(random.randint(0, 4294967295))
 
-
     """with open("logs.txt", "w") as file:
         graph = Graph()
         current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -119,13 +120,13 @@ if __name__ == "__main__":
         aco = ACO(graph)
         aco.run(1000, 3, 9, 10_000, 0.3, 0.5, 2_000)"""
 
-    """with open("logs.txt", "w") as file:
+    with open("logs.txt", "w") as file:
         graph = Graph()
         current_dir = os.path.dirname(os.path.abspath(__file__))
         file_path = os.path.join(current_dir, 'benchmarks', f'4d1000.txt')
         graph.load(file_path, ph=0.5)
 
-        for k in range(500, 100, -100):
+        for k in range(1000, 100, -50):
             graph.add_k_nearest_edges(k)
 
             aco = ACO(graph)
@@ -136,30 +137,7 @@ if __name__ == "__main__":
                                        evap=0.30,
                                        start_ph=0.50,
                                        worktime=2000,
-                                       fine=70_000) for _ in range(5)]
+                                       fine=70_000) for _ in range(10)]
 
             print(f"{k} {res}")
-            print(f"{k} {res}", file=file)"""
-
-    """start = time.time()
-    for _ in range(1):
-        aco.step(100_000, 1, 2, 200, 0.2)
-    finish = time.time()
-    print(finish - start)"""
-    graph = Graph()
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    file_path = os.path.join(current_dir, 'benchmarks', f'2d300.txt')
-    graph.load(file_path, ph=0.5)
-    graph.add_k_nearest_edges(299)
-    aco = ACO(graph)
-    # graph.visualize_best_path_2d(bp)
-    """for _ in range(10):
-        print(aco.run_performance(500, 3, 10, 650, 0.4, 0.75, 3, 5000))"""
-    aco.run(300, 3, 9, 400, 0.3, 0.5, 20)
-    # graph.visualize_best_path_2d(bp)
-    # print(aco.run_performance(100, 2.85, 8.39, 400, 0.20, 0.50, 10))
-    # 462, 3.69, 7.05, 7147, 0.23, 0.63, 3
-    # 483, 0.95, 6.16, 4990, 0.54, 0.38, 3
-    # 474, 2.69, 6.05, 738.1, 0.2, 0.47, 3
-    # 469, 2.53, 7.27, 8045, 0.43, 0.71, 3
-    # 100, 1.48, 8.18, 1078, 0.20, 0.50, 3
+            print(f"{k} {res}", file=file)
